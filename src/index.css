@@ -1,0 +1,104 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 35 30% 97%;
+    --foreground: 20 20% 15%;
+
+    --card: 30 25% 99%;
+    --card-foreground: 20 20% 15%;
+
+    --popover: 30 25% 99%;
+    --popover-foreground: 20 20% 15%;
+
+    --primary: 25 80% 52%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 35 40% 92%;
+    --secondary-foreground: 20 20% 25%;
+
+    --muted: 30 20% 94%;
+    --muted-foreground: 20 10% 50%;
+
+    --accent: 18 70% 58%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 30 20% 88%;
+    --input: 30 20% 88%;
+    --ring: 25 80% 52%;
+
+    --radius: 0.75rem;
+
+    --success: 145 60% 42%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 40 90% 55%;
+    --warning-foreground: 20 20% 15%;
+
+    --vip: 280 60% 55%;
+    --vip-foreground: 0 0% 100%;
+
+    --regular: 25 80% 52%;
+    --regular-foreground: 0 0% 100%;
+
+    --normal: 30 20% 70%;
+    --normal-foreground: 0 0% 100%;
+
+    --sidebar-background: 30 25% 96%;
+    --sidebar-foreground: 20 20% 25%;
+    --sidebar-primary: 25 80% 52%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 35 40% 92%;
+    --sidebar-accent-foreground: 20 20% 25%;
+    --sidebar-border: 30 20% 88%;
+    --sidebar-ring: 25 80% 52%;
+  }
+
+  .dark {
+    --background: 20 20% 10%;
+    --foreground: 30 20% 92%;
+    --card: 20 18% 14%;
+    --card-foreground: 30 20% 92%;
+    --popover: 20 18% 14%;
+    --popover-foreground: 30 20% 92%;
+    --primary: 25 80% 52%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 20 15% 20%;
+    --secondary-foreground: 30 20% 92%;
+    --muted: 20 15% 20%;
+    --muted-foreground: 30 10% 55%;
+    --accent: 18 70% 58%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 20 15% 22%;
+    --input: 20 15% 22%;
+    --ring: 25 80% 52%;
+    --sidebar-background: 20 18% 12%;
+    --sidebar-foreground: 30 20% 92%;
+    --sidebar-primary: 25 80% 52%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 20 15% 18%;
+    --sidebar-accent-foreground: 30 20% 92%;
+    --sidebar-border: 20 15% 22%;
+    --sidebar-ring: 25 80% 52%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+}
