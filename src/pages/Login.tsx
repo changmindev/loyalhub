@@ -7,6 +7,10 @@ const Login = () => {
   const { isReady, isLoggedIn, login } = useAuth();
   const navigate = useNavigate();
 
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   if (!isReady) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-muted">
@@ -17,10 +21,6 @@ const Login = () => {
   if (isLoggedIn) {
     return <Navigate to="/" replace />;
   }
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
