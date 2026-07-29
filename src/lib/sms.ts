@@ -13,7 +13,6 @@ export async function sendSmsToCustomers(params: {
 
   if (isTestMode) {
     // 테스트 모드: 실제 발송 없이 콘솔 출력만 수행
-    // eslint-disable-next-line no-console
     console.log("[SMS TEST MODE] 메시지:", text, "대상:", customers);
     return;
   }
