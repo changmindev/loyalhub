@@ -1,7 +1,8 @@
 # 🏪 LoyalHub — 소상공인을 위한 고객 관리 & 쿠폰 발송 앱
 
-> **바이브 코딩(Vibe Coding)** 으로 만든 웹 서비스 사이드 프로젝트  
-> AI와 대화하듯 기획·개발을 진행하며 [Lovable.dev](https://lovable.dev) 를 활용해 빠르게 구축했습니다.
+> 소상공인용 고객 관리(CRM) 웹 서비스 사이드 프로젝트  
+> 초기 화면·스캐폴딩은 AI 빌더([Lovable.dev](https://lovable.dev))로 빠르게 세우고,
+> **분석 로직 분리 · 단위 테스트 설계 · CI 구성은 직접 작업했습니다.** ([품질 관리](#-품질-관리))
 
 ---
 
@@ -37,7 +38,35 @@ UI         shadcn/ui + Radix UI + Tailwind CSS
 SMS        sms-server.cjs (Node.js 로컬 서버)
 배포       Vercel
 테스트     Vitest + Testing Library
+CI         GitHub Actions (lint · test · build)
 ```
+
+---
+
+## 🧪 품질 관리
+
+AI 빌더로 생성된 초기 코드에는 테스트도 CI도 없었습니다.
+QA 엔지니어로서 아래는 직접 설계하고 적용했습니다.
+
+### 분석 로직 단위 테스트 — `src/lib/analytics.test.ts` (Vitest, 20케이스)
+
+검증할 값이 있는 계산 로직을 화면에서 `lib/` 으로 분리한 뒤, 관점을 나눠 케이스를 설계했습니다.
+
+| 관점 | 설계한 케이스 |
+|------|--------------|
+| **경계값 분석** | 이탈 위험도 판정에서 `14일 = ok` / `15일 = warn` 처럼 임계값 바로 위·아래를 각각 고정 |
+| **예외 입력** | `null` · `undefined` · 파싱 불가능한 날짜 문자열 · 미래 날짜(음수가 나오지 않도록 0으로 클램프) |
+| **설정값 폴백** | 객단가·전환율 설정이 localStorage 에 없거나 값이 깨졌을 때 기본값으로 되돌아오는 경로 |
+
+### CI — `.github/workflows/ci.yml`
+
+push·PR 마다 `lint → test → build` 를 자동 실행해, 검사가 깨진 코드가 `main` 에 남지 않도록 했습니다.
+
+### 직접 발견·수정한 결함
+
+- `Login.tsx` 에서 조건부 `return` **뒤에** `useState` 가 호출되던 React Hooks 규칙 위반
+- lint 에러 정리 (`require` → `import`, 빈 interface, 사용되지 않는 `eslint-disable` 주석)
+- 로그인이 실제 인증이 아닌 **데모 인증**임을 README·화면에 명시 (오해 소지 제거)
 
 ---
 
@@ -63,15 +92,17 @@ sideproject/
 │   │   └── ...              # 대시보드 위젯, 하단 네비게이션, 카드 등
 │   ├── lib/
 │   │   ├── supabaseApi.ts   # Supabase 연동 API 함수
+│   │   ├── analytics.ts     # 이탈 위험도·객단가·전환율 등 분석 로직
+│   │   ├── analytics.test.ts # 분석 로직 단위 테스트 (경계값·예외·폴백)
 │   │   ├── sms.ts           # SMS 발송 유틸
 │   │   └── utils.ts         # 공통 유틸리티
 │   ├── hooks/
 │   │   ├── use-toast.ts     # 토스트 알림 훅
 │   │   └── use-mobile.tsx   # 모바일 감지 훅
 │   ├── test/
-│   │   ├── setup.ts         # 테스트 환경 설정
-│   │   └── example.test.ts  # 예제 테스트
+│   │   └── setup.ts         # 테스트 환경 설정 (jsdom · jest-dom)
 │   └── App.tsx              # 라우터 및 전역 레이아웃
+├── .github/workflows/ci.yml # lint · test · build 자동 실행
 ├── sms-server.cjs           # SMS 발송용 Node.js 로컬 서버
 ├── vercel.json              # Vercel 배포 설정
 ├── vite.config.ts
@@ -162,17 +193,20 @@ npm run test
 
 ---
 
-## 🧑‍💻 바이브 코딩이란?
+## 🧑‍💻 어떻게 만들었나
 
-이 프로젝트는 **바이브 코딩(Vibe Coding)** 방식으로 만들었습니다.  
-코드를 직접 한 줄씩 짜는 대신, AI에게 원하는 기능을 자연어로 설명하고  
-[Lovable.dev](https://lovable.dev) 가 코드를 자동 생성·수정·커밋합니다.
+초기 구현은 AI 빌더([Lovable.dev](https://lovable.dev))로 진행했습니다. 원하는 기능을
+자연어로 설명하면 코드가 생성되는 방식이라, 화면·라우팅처럼 정형화된 부분을
+빠르게 세울 수 있었습니다.
 
 ```
-기획 아이디어 → AI에게 프롬프트 → 코드 생성 → GitHub 자동 커밋 → 배포
+초기 스캐폴딩 (AI 빌더)  →  분석 로직 분리 · 단위 테스트 · CI 구성 (직접)
 ```
 
-덕분에 기획부터 배포까지 빠르게 프로토타입을 만들 수 있었습니다.
+다만 그렇게 나온 코드에는 **테스트도, CI도, Hooks 규칙 위반을 잡아줄 장치도
+없었습니다.** 생성 결과를 그대로 두지 않고 검증할 값이 있는 로직을 `lib/` 으로
+분리한 뒤, 경계값·예외 입력 중심으로 테스트를 붙이고 CI 에 태우는 작업을 직접
+했습니다. 자세한 내용은 [품질 관리](#-품질-관리) 참고.
 
 ---
 
