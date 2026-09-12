@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { AVERAGE_TICKET_STORAGE_KEY } from "@/lib/analytics";
+import QueryErrorNotice from "@/components/QueryErrorNotice";
 
 const Settings = () => {
   const { logout } = useAuth();
