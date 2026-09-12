@@ -103,8 +103,7 @@ const Login = () => {
           <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 text-yellow-900 px-2 py-0.5 text-[10px] font-semibold mr-1">
             데모 인증
           </span>
-          실제 이메일/비밀번호 인증, 결제 연동은 나중에 붙일 수 있도록 설계된
-          데모 로그인 화면입니다.
+          아무 이메일·비밀번호로 로그인됩니다. 실제 인증·결제 연동은 데모 범위 밖입니다.
         </div>
       </div>
     </div>
