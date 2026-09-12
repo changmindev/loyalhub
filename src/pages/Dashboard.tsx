@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { fetchCouponHistory, fetchCustomers } from "@/lib/supabaseApi";
 import { useAuth } from "@/contexts/AuthContext";
-import { daysSince, getRiskLevel } from "@/lib/analytics";
+import { daysSince, formatKoreanDate, getRiskLevel } from "@/lib/analytics";
 import { DashboardTopBanner } from "@/components/DashboardTopBanner";
 import { CampaignImpactCards } from "@/components/CampaignImpactCards";
 import { DailyTip } from "@/components/DailyTip";
@@ -182,7 +182,7 @@ const Dashboard = () => {
           </div>
           <p className="text-sm font-medium">{latestCoupon.title}</p>
           <p className="text-xs text-muted-foreground mt-1">
-            {latestCoupon.sentAt} · {latestCoupon.targetGrade} 대상 · {latestCoupon.sentCount}명
+            {formatKoreanDate(latestCoupon.sentAt)} · {latestCoupon.targetGrade} 대상 · {latestCoupon.sentCount}명
           </p>
         </div>
       )}

@@ -1,7 +1,34 @@
-export type RiskLevel = "ok" | "warn" | "danger";
+/**
+ * 방문 최신도 기준 상태.
+ *
+ * `none` 은 **아직 한 번도 오지 않은 사람**이다. 이탈 위험도와는 다른 축이라
+ * 예전처럼 `warn` 으로 뭉뚱그리지 않는다. 관계가 식어가는 손님에게는
+ * 재방문 쿠폰이 맞지만, 한 번도 안 온 사람에게는 첫 방문 유도가 맞다.
+ * 대시보드도 이 사람을 '7~30일 미방문'에 넣지 않으므로,
+ * 상세 화면만 '주의'라고 하면 두 화면의 말이 달라진다.
+ */
+export type RiskLevel = "none" | "ok" | "warn" | "danger";
 
 export const AVERAGE_TICKET_STORAGE_KEY = "loyalhub:avgTicket";
 export const CONVERSION_RATE_STORAGE_KEY = "loyalhub:conversionRate";
+
+/**
+ * 날짜를 `YYYY-MM-DD` 로 자른다. **저장될 날짜는 전부 이 형태를 거친다.**
+ *
+ * 예전에는 시드가 `2026-09-12`, 앱이 새로 쓰는 값이 `2026-09-12T05:10:15.074Z` 라
+ * 같은 필드에 두 가지 형식이 섞여 있었다. 화면에 날것으로 뿌리는 곳이 있어
+ * 대시보드 한 화면에서 `2026-09-12` 와 `2026.09.12` 가 나란히 보였고,
+ * 형식을 단언하는 자동화는 무엇을 기대해야 할지 알 수 없었다.
+ *
+ * ⚠️ 기준은 **UTC** 다. Dashboard 의 '오늘 방문' 판정(`toISOString().slice(0,10)`)과
+ * mockData 의 `daysAgo` 가 모두 UTC 라, 여기서 로컬 기준으로 자르면
+ * KST 오전 9시 이전에만 하루 어긋나는 종류의 버그가 된다.
+ */
+export function toISODate(value: Date | string = new Date()): string {
+  const d = typeof value === "string" ? new Date(value) : value;
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toISOString().slice(0, 10);
+}
 
 // 한국식 날짜 포맷 (YYYY.MM.DD)
 export function formatKoreanDate(dateStr: string | null | undefined): string {
@@ -26,7 +53,7 @@ export function daysSince(dateStr: string | null | undefined): number | null {
 
 // 방문 경과일 기준 위험도 레벨 계산
 export function getRiskLevel(days: number | null): RiskLevel {
-  if (days == null) return "warn";
+  if (days == null) return "none";
   if (days <= 14) return "ok";
   if (days <= 30) return "warn";
   return "danger";
@@ -34,6 +61,8 @@ export function getRiskLevel(days: number | null): RiskLevel {
 
 export function getRiskLabel(level: RiskLevel): string {
   switch (level) {
+    case "none":
+      return "방문 전";
     case "ok":
       return "안정";
     case "warn":

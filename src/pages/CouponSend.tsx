@@ -11,6 +11,7 @@ import {
 import { isSmsBlocked, sendSmsToCustomers } from "@/lib/sms";
 import { couponTemplates } from "@/lib/couponTemplates";
 import QueryErrorNotice from "@/components/QueryErrorNotice";
+import { formatKoreanDate } from "@/lib/analytics";
 import { useAuth } from "@/contexts/AuthContext";
 
 const targetOptions: (CustomerGrade | "전체")[] = ["전체", "VIP", "단골", "일반"];
@@ -329,7 +330,7 @@ const CouponSend = () => {
             <li key={c.id} data-testid="coupon-history-item" className="rounded-2xl border bg-card p-3.5">
               <p className="text-sm font-medium">{c.title}</p>
               <p className="text-xs text-muted-foreground mt-1">
-                {c.sentAt} · {c.targetGrade} · {c.sentCount}명
+                {formatKoreanDate(c.sentAt)} · {c.targetGrade} · {c.sentCount}명
               </p>
             </li>
           ))}

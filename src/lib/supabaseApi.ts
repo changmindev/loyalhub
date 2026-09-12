@@ -1,6 +1,7 @@
 import { isDemoMode, requireSupabase } from "@/supabaseClient";
 import { demoStore } from "@/lib/demoStore";
 import type { CustomerGrade } from "@/lib/mockData";
+import { toISODate } from "@/lib/analytics";
 
 // 데모 분기는 이 파일 한 곳에만 둔다.
 // 화면·컴포넌트가 데모 여부를 알기 시작하면 분기가 앱 전체로 번진다.
@@ -31,6 +32,7 @@ export type CustomerSummary = {
   phone: string;
   grade: CustomerGrade;
   visitCount: number;
+  /** `YYYY-MM-DD` (UTC 기준). 방문 이력이 없으면 빈 문자열. `toISODate()` 로만 쓴다 */
   lastVisit: string;
   memo: string;
 };
@@ -38,6 +40,7 @@ export type CustomerSummary = {
 export type CouponHistoryItem = {
   id: string;
   title: string;
+  /** `YYYY-MM-DD` (UTC 기준). `toISODate()` 로만 쓴다 */
   sentAt: string;
   targetGrade: CustomerGrade | "전체";
   sentCount: number;
@@ -163,7 +166,7 @@ export async function updateCustomerVisit(id: string): Promise<void> {
     .from("customers")
     .update({
       visit_count: currentVisitCount + 1,
-      last_visit: new Date().toISOString(),
+      last_visit: toISODate(),
     })
     .eq("id", id);
 
@@ -230,7 +233,7 @@ export async function fetchCouponHistory(): Promise<CouponHistoryItem[]> {
   return (data || []).map((c: DbCoupon) => ({
     id: c.id,
     title: c.message,
-    sentAt: c.scheduled_at ?? c.created_at,
+    sentAt: toISODate(c.scheduled_at ?? c.created_at),
     targetGrade: (c.target_grade as CustomerGrade | null) ?? "전체",
     sentCount: c.sent_count ?? 0,
   }));

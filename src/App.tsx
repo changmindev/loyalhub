@@ -10,6 +10,7 @@ import CouponSend from "./pages/CouponSend";
 import CustomerDetail from "./pages/CustomerDetail";
 import BottomNav from "./components/BottomNav";
 import DemoBanner from "./components/DemoBanner";
+import ErrorBoundary from "./components/ErrorBoundary";
 import ScrollRestoration from "./components/ScrollRestoration";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
@@ -54,51 +55,56 @@ const App = () => (
         <BrowserRouter>
           <ScrollRestoration />
           <DemoBanner />
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route
-              path="/"
-              element={
-                <RequireAuth>
-                  <Dashboard />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/customers"
-              element={
-                <RequireAuth>
-                  <CustomerList />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/customers/:id"
-              element={
-                <RequireAuth>
-                  <CustomerDetail />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/coupon"
-              element={
-                <RequireAuth>
-                  <CouponSend />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/settings"
-              element={
-                <RequireAuth>
-                  <Settings />
-                </RequireAuth>
-              }
-            />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          {/* 경계를 Routes 바깥이 아니라 안쪽에 두는 이유:
+              화면 하나가 죽어도 하단 네비게이션은 살아 있어야
+              사용자가 다른 화면으로 빠져나갈 수 있다. */}
+          <ErrorBoundary>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route
+                path="/"
+                element={
+                  <RequireAuth>
+                    <Dashboard />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/customers"
+                element={
+                  <RequireAuth>
+                    <CustomerList />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/customers/:id"
+                element={
+                  <RequireAuth>
+                    <CustomerDetail />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/coupon"
+                element={
+                  <RequireAuth>
+                    <CouponSend />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/settings"
+                element={
+                  <RequireAuth>
+                    <Settings />
+                  </RequireAuth>
+                }
+              />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </ErrorBoundary>
           <BottomNav />
         </BrowserRouter>
       </AuthProvider>
