@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import {
+  toISODate,
   formatKoreanDate,
   daysSince,
   getRiskLevel,
@@ -15,6 +16,33 @@ import {
 
 beforeEach(() => {
   window.localStorage.clear();
+});
+
+describe("toISODate — 저장되는 날짜는 전부 이 형태여야 한다", () => {
+  it("Date를 YYYY-MM-DD로 자른다", () => {
+    expect(toISODate(new Date("2026-09-12T05:10:15.074Z"))).toBe("2026-09-12");
+  });
+
+  it("이미 날짜 문자열이면 그대로 돌려준다 (멱등)", () => {
+    expect(toISODate("2026-09-12")).toBe("2026-09-12");
+    expect(toISODate(toISODate("2026-09-12"))).toBe("2026-09-12");
+  });
+
+  it("ISO 타임스탬프 문자열도 날짜로 자른다", () => {
+    expect(toISODate("2026-09-12T23:59:59.999Z")).toBe("2026-09-12");
+  });
+
+  it("파싱 불가능한 값은 빈 문자열 — 잘못된 날짜를 저장하느니 비운다", () => {
+    expect(toISODate("어제")).toBe("");
+  });
+
+  it("인자가 없으면 오늘(UTC)", () => {
+    expect(toISODate()).toBe(new Date().toISOString().slice(0, 10));
+  });
+
+  it("결과는 formatKoreanDate가 그대로 받을 수 있다", () => {
+    expect(formatKoreanDate(toISODate("2026-09-12T05:10:15.074Z"))).toBe("2026.09.12");
+  });
 });
 
 describe("formatKoreanDate", () => {

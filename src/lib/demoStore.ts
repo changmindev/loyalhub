@@ -9,6 +9,7 @@
  */
 
 import { couponHistory as seedCoupons, customers as seedCustomers } from "@/lib/mockData";
+import { toISODate } from "@/lib/analytics";
 import type {
   AppSettings,
   CouponHistoryItem,
@@ -111,7 +112,7 @@ export const demoStore = {
   async updateCustomerVisit(id: string): Promise<void> {
     state.customers = state.customers.map((c) =>
       c.id === id
-        ? { ...c, visitCount: c.visitCount + 1, lastVisit: new Date().toISOString() }
+        ? { ...c, visitCount: c.visitCount + 1, lastVisit: toISODate() }
         : c,
     );
     persist();
@@ -138,7 +139,7 @@ export const demoStore = {
       {
         id: `demo-coupon-${state.coupons.length + 1}`,
         title: input.message,
-        sentAt: input.scheduledAt ?? new Date().toISOString(),
+        sentAt: toISODate(input.scheduledAt ?? new Date()),
         targetGrade: input.target,
         sentCount: input.sentCount,
       },
