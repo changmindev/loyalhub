@@ -63,6 +63,7 @@ const Signup = () => {
               id="signup-email"
               name="email"
               data-testid="signup-email"
+              autoComplete="username"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -79,6 +80,7 @@ const Signup = () => {
               id="signup-password"
               name="password"
               data-testid="signup-password"
+              autoComplete="new-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -95,6 +97,7 @@ const Signup = () => {
               id="signup-password-confirm"
               name="passwordConfirm"
               data-testid="signup-password-confirm"
+              autoComplete="new-password"
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
@@ -116,6 +119,7 @@ const Signup = () => {
               id="signup-store-name"
               name="storeName"
               data-testid="signup-store-name"
+              autoComplete="organization"
               type="text"
               value={shopName}
               onChange={(e) => setShopName(e.target.value)}
