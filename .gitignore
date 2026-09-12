@@ -9,6 +9,12 @@ lerna-debug.log*
 
 node_modules
 dist
+
+# 환경변수 — 절대 커밋하지 말 것 (.env.example 만 커밋)
+.env
+.env.local
+.env.*.local
+!.env.example
 dist-ssr
 *.local
 

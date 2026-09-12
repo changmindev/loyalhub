@@ -1,5 +1,9 @@
-import { supabase } from "@/supabaseClient";
+import { isDemoMode, requireSupabase } from "@/supabaseClient";
+import { demoStore } from "@/lib/demoStore";
 import type { CustomerGrade } from "@/lib/mockData";
+
+// 데모 분기는 이 파일 한 곳에만 둔다.
+// 화면·컴포넌트가 데모 여부를 알기 시작하면 분기가 앱 전체로 번진다.
 
 export type DbCustomer = {
   id: string;
@@ -50,7 +54,10 @@ const toCustomerGrade = (grade: string | null): CustomerGrade => {
 };
 
 export async function fetchCustomers(): Promise<CustomerSummary[]> {
-  const { data, error } = await supabase
+  if (isDemoMode) return demoStore.fetchCustomers();
+  const sb = requireSupabase();
+
+  const { data, error } = await sb
     .from("customers")
     .select("id, name, phone, grade, visit_count, last_visit, memo, created_at")
     .order("last_visit", { ascending: false, nullsFirst: false });
@@ -71,7 +78,10 @@ export async function fetchCustomers(): Promise<CustomerSummary[]> {
 }
 
 export async function fetchCustomerById(id: string): Promise<CustomerSummary | null> {
-  const { data, error } = await supabase
+  if (isDemoMode) return demoStore.fetchCustomerById(id);
+  const sb = requireSupabase();
+
+  const { data, error } = await sb
     .from("customers")
     .select("id, name, phone, grade, visit_count, last_visit, memo, created_at")
     .eq("id", id)
@@ -100,7 +110,10 @@ export async function createCustomer(input: {
   name: string;
   phone: string;
 }): Promise<CustomerSummary> {
-  const { data, error } = await supabase
+  if (isDemoMode) return demoStore.createCustomer(input);
+  const sb = requireSupabase();
+
+  const { data, error } = await sb
     .from("customers")
     .insert({
       name: input.name,
@@ -131,7 +144,10 @@ export async function createCustomer(input: {
 }
 
 export async function updateCustomerVisit(id: string): Promise<void> {
-  const { data: existing, error: fetchError } = await supabase
+  if (isDemoMode) return demoStore.updateCustomerVisit(id);
+  const sb = requireSupabase();
+
+  const { data: existing, error: fetchError } = await sb
     .from("customers")
     .select("visit_count")
     .eq("id", id)
@@ -143,7 +159,7 @@ export async function updateCustomerVisit(id: string): Promise<void> {
 
   const currentVisitCount = (existing as { visit_count: number | null } | null)?.visit_count ?? 0;
 
-  const { error } = await supabase
+  const { error } = await sb
     .from("customers")
     .update({
       visit_count: currentVisitCount + 1,
@@ -161,7 +177,10 @@ export async function updateCustomerProfile(input: {
   grade: CustomerGrade;
   memo: string;
 }): Promise<void> {
-  const { error } = await supabase
+  if (isDemoMode) return demoStore.updateCustomerProfile(input);
+  const sb = requireSupabase();
+
+  const { error } = await sb
     .from("customers")
     .update({
       grade: input.grade,
@@ -180,7 +199,10 @@ export async function createCouponLog(input: {
   sentCount: number;
   scheduledAt: string | null;
 }): Promise<void> {
-  const { error } = await supabase.from("coupons").insert({
+  if (isDemoMode) return demoStore.createCouponLog(input);
+  const sb = requireSupabase();
+
+  const { error } = await sb.from("coupons").insert({
     message: input.message,
     target_grade: input.target === "전체" ? null : input.target,
     sent_count: input.sentCount,
@@ -193,7 +215,10 @@ export async function createCouponLog(input: {
 }
 
 export async function fetchCouponHistory(): Promise<CouponHistoryItem[]> {
-  const { data, error } = await supabase
+  if (isDemoMode) return demoStore.fetchCouponHistory();
+  const sb = requireSupabase();
+
+  const { data, error } = await sb
     .from("coupons")
     .select("id, message, target_grade, sent_count, scheduled_at, created_at")
     .order("created_at", { ascending: false });
@@ -214,7 +239,10 @@ export async function fetchCouponHistory(): Promise<CouponHistoryItem[]> {
 const SETTINGS_ID = "default";
 
 export async function fetchSettings(): Promise<AppSettings> {
-  const { data, error } = await supabase
+  if (isDemoMode) return demoStore.fetchSettings();
+  const sb = requireSupabase();
+
+  const { data, error } = await sb
     .from("settings")
     .select("naver_api_key, kakao_channel_id")
     .eq("id", SETTINGS_ID)
@@ -235,7 +263,10 @@ export async function fetchSettings(): Promise<AppSettings> {
 }
 
 export async function saveSettings(input: AppSettings): Promise<void> {
-  const { error } = await supabase.from("settings").upsert(
+  if (isDemoMode) return demoStore.saveSettings(input);
+  const sb = requireSupabase();
+
+  const { error } = await sb.from("settings").upsert(
     {
       id: SETTINGS_ID,
       naver_api_key: input.naverApiKey,

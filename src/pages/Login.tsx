@@ -47,10 +47,13 @@ const Login = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold mb-1.5">
+            <label htmlFor="login-email" className="block text-xs font-semibold mb-1.5">
               이메일
             </label>
             <input
+              id="login-email"
+              name="email"
+              data-testid="login-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -60,10 +63,13 @@ const Login = () => {
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold mb-1.5">
+            <label htmlFor="login-password" className="block text-xs font-semibold mb-1.5">
               비밀번호
             </label>
             <input
+              id="login-password"
+              name="password"
+              data-testid="login-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -74,6 +80,7 @@ const Login = () => {
           </div>
 
           <button
+            data-testid="login-submit"
             type="submit"
             disabled={isSubmitting}
             className="w-full rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground active:opacity-90 transition-opacity"
@@ -94,7 +101,7 @@ const Login = () => {
 
         <div className="mt-4 rounded-xl border bg-muted/40 px-3 py-2 text-[11px] text-muted-foreground">
           <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 text-yellow-900 px-2 py-0.5 text-[10px] font-semibold mr-1">
-            준비중
+            데모 인증
           </span>
           실제 이메일/비밀번호 인증, 결제 연동은 나중에 붙일 수 있도록 설계된
           데모 로그인 화면입니다.

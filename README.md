@@ -1,223 +1,103 @@
-# 🏪 LoyalHub — 소상공인을 위한 고객 관리 & 쿠폰 발송 앱
+# 🏪 LoyalHub
 
-> 소상공인용 고객 관리(CRM) 웹 서비스 사이드 프로젝트  
-> 초기 화면·스캐폴딩은 AI 빌더([Lovable.dev](https://lovable.dev))로 빠르게 세우고,
-> **분석 로직 분리 · 단위 테스트 설계 · CI 구성은 직접 작업했습니다.** ([품질 관리](#-품질-관리))
+소상공인용 **고객 관리 + 쿠폰 발송** 데모 앱.
 
----
-
-## 📌 프로젝트 소개
-
-LoyalHub은 소규모 가게·매장을 운영하는 사장님을 위한 **고객 관리(CRM) + 쿠폰 발송 웹 앱**입니다.  
-고객 목록을 한눈에 보고, 개별 고객 상세 정보를 확인하며, 쿠폰·문자를 손쉽게 보낼 수 있습니다.
-
-### 주요 기능
-
-| 기능 | 설명 |
-|------|------|
-| 🔐 회원가입 / 로그인 | 이메일+비밀번호 입력 폼, 가게 이름·카테고리 등록 (현재는 데모 인증 — 아래 [인증 흐름](#-인증-흐름) 참고) |
-| 📊 대시보드 | 주요 지표 위젯, 차트(Recharts)로 현황 한눈에 파악 |
-| 👥 고객 목록 | 전체 고객 리스트 조회, 검색·필터 |
-| 👤 고객 상세 | 개별 고객 방문 이력, 포인트, 등급 등 상세 정보 |
-| 🎫 쿠폰 발송 | 선택한 고객에게 쿠폰 생성 및 발송 |
-| 📱 SMS 발송 | sms-server를 통한 문자 메시지 발송 |
-| ⚙️ 설정 | 계정·가게 정보 관리 |
-
----
-
-## 🛠 기술 스택
-
-```
-Frontend   React 18 + TypeScript + Vite
-UI         shadcn/ui + Radix UI + Tailwind CSS
-상태관리    TanStack React Query
-라우팅     React Router DOM v6
-백엔드     Supabase (Auth + DB + Storage)
-폼         React Hook Form + Zod
-차트       Recharts
-SMS        sms-server.cjs (Node.js 로컬 서버)
-배포       Vercel
-테스트     Vitest + Testing Library
-CI         GitHub Actions (lint · test · build)
-```
-
----
-
-## 🧪 품질 관리
-
-AI 빌더로 생성된 초기 코드에는 테스트도 CI도 없었습니다.
-QA 엔지니어로서 아래는 직접 설계하고 적용했습니다.
-
-### 분석 로직 단위 테스트 — `src/lib/analytics.test.ts` (Vitest, 20케이스)
-
-검증할 값이 있는 계산 로직을 화면에서 `lib/` 으로 분리한 뒤, 관점을 나눠 케이스를 설계했습니다.
-
-| 관점 | 설계한 케이스 |
-|------|--------------|
-| **경계값 분석** | 이탈 위험도 판정에서 `14일 = ok` / `15일 = warn` 처럼 임계값 바로 위·아래를 각각 고정 |
-| **예외 입력** | `null` · `undefined` · 파싱 불가능한 날짜 문자열 · 미래 날짜(음수가 나오지 않도록 0으로 클램프) |
-| **설정값 폴백** | 객단가·전환율 설정이 localStorage 에 없거나 값이 깨졌을 때 기본값으로 되돌아오는 경로 |
-
-### CI — `.github/workflows/ci.yml`
-
-push·PR 마다 `lint → test → build` 를 자동 실행해, 검사가 깨진 코드가 `main` 에 남지 않도록 했습니다.
-
-### 직접 발견·수정한 결함
-
-- `Login.tsx` 에서 조건부 `return` **뒤에** `useState` 가 호출되던 React Hooks 규칙 위반
-- lint 에러 정리 (`require` → `import`, 빈 interface, 사용되지 않는 `eslint-disable` 주석)
-- 로그인이 실제 인증이 아닌 **데모 인증**임을 README·화면에 명시 (오해 소지 제거)
-
----
-
-## 📁 폴더 구조
-
-```
-sideproject/
-├── public/                  # 정적 파일 (favicon 등)
-├── src/
-│   ├── pages/               # 라우트별 화면 컴포넌트
-│   │   ├── Login.tsx        # 로그인 페이지
-│   │   ├── Signup.tsx       # 회원가입 페이지
-│   │   ├── Dashboard.tsx    # 대시보드 메인
-│   │   ├── CustomerList.tsx # 고객 목록
-│   │   ├── CustomerDetail.tsx # 고객 상세
-│   │   ├── CouponSend.tsx   # 쿠폰 발송
-│   │   └── Settings.tsx     # 설정
-│   ├── contexts/
-│   │   └── AuthContext.tsx  # 전역 인증 상태 (localStorage 기반)
-│   ├── components/
-│   │   ├── ui/              # shadcn/ui 기반 재사용 UI 원자 컴포넌트
-│   │   │                    # (Button, Input, Dialog, Table, Toast 등)
-│   │   └── ...              # 대시보드 위젯, 하단 네비게이션, 카드 등
-│   ├── lib/
-│   │   ├── supabaseApi.ts   # Supabase 연동 API 함수
-│   │   ├── analytics.ts     # 이탈 위험도·객단가·전환율 등 분석 로직
-│   │   ├── analytics.test.ts # 분석 로직 단위 테스트 (경계값·예외·폴백)
-│   │   ├── sms.ts           # SMS 발송 유틸
-│   │   └── utils.ts         # 공통 유틸리티
-│   ├── hooks/
-│   │   ├── use-toast.ts     # 토스트 알림 훅
-│   │   └── use-mobile.tsx   # 모바일 감지 훅
-│   ├── test/
-│   │   └── setup.ts         # 테스트 환경 설정 (jsdom · jest-dom)
-│   └── App.tsx              # 라우터 및 전역 레이아웃
-├── .github/workflows/ci.yml # lint · test · build 자동 실행
-├── sms-server.cjs           # SMS 발송용 Node.js 로컬 서버
-├── vercel.json              # Vercel 배포 설정
-├── vite.config.ts
-├── tailwind.config.ts
-└── package.json
-```
-
----
-
-## 🚀 시작하기
-
-### 사전 요구 사항
-
-- Node.js 18 이상
-- npm 또는 bun
-
-### 설치 및 실행
+초기 화면·스캐폴딩은 AI 빌더([Lovable.dev](https://lovable.dev))로 세우고,
+**결함을 찾아 고치고 · 테스트를 붙이고 · 자동화 가능한 상태로 정비하는 작업은 직접** 했습니다.
 
 ```bash
-# 1. 저장소 클론
-git clone https://github.com/changmindev/sideproject.git
-cd sideproject
-
-# 2. 의존성 설치
+git clone https://github.com/changmindev/sideproject.git && cd sideproject
 npm install
-# 또는
-bun install
-
-# 3. 개발 서버 실행
-npm run dev
+npm run dev          # → http://localhost:8080
 ```
 
-브라우저에서 `http://localhost:5173` 접속
+**환경변수 없이 바로 뜹니다.** Supabase 설정이 없으면 데모 모드로 실행되며,
+고객 10명과 쿠폰 이력 5건이 채워진 상태로 모든 화면이 동작합니다.
 
-### SMS 서버 실행 (선택)
+---
 
-문자 발송 기능을 사용하려면 별도로 SMS 서버를 실행합니다.
+## 이 저장소에서 볼 것
 
-```bash
-node sms-server.cjs
+| 문서 | 내용 |
+|---|---|
+| **[docs/DEFECTS.md](docs/DEFECTS.md)** | 직접 발견한 **결함 17건** — 재현 절차 · 기대/실제 · 원인 · 처리 |
+| **[docs/E2E.md](docs/E2E.md)** | 자동화 기준 — localStorage 계약 · 검증 버킷 · 셀렉터 · 실패 주입법 |
+| `src/lib/analytics.test.ts` | 분석 로직 단위 테스트 20케이스 (경계값 · 예외 입력 · 폴백) |
+
+---
+
+## 데모 범위 / 범위 밖
+
+어디까지 실제로 동작하고 어디부터 형식인지 먼저 밝힙니다.
+
+| 동작함 | 범위 밖 |
+|---|---|
+| 고객 등록·조회·수정, 등급·방문 이력 | **문자·알림톡 실제 발송** (건당 비용 + 발신번호 사전등록) |
+| 방문 최신도 기반 세그먼트·위험도 판정 | **실제 인증** (localStorage 데모 로그인) |
+| 쿠폰 대상 산정·미리보기·발송 이력 | 네이버 예약 · 카카오 채널 연동 |
+| 객단가 기반 고객 가치·캠페인 효과 추정 | 결제 · 생일 자동 추천 · 고객 삭제 |
+
+🔴 **문자는 발송되지 않습니다.** `sms-server.cjs` 는 참고 구현이고 의존성이 없어 실행되지 않습니다.
+데모 모드에서는 프런트엔드가 **네트워크 요청 자체를 만들지 않으므로**, 실수로 문자가 나갈 경로가 없습니다.
+
+---
+
+## 품질 관리
+
+AI 빌더가 만든 코드에는 테스트도 CI도, 잘못된 상태를 잡아줄 장치도 없었습니다.
+
+**단위 테스트** — 검증할 값이 있는 계산 로직을 화면에서 `lib/` 으로 분리한 뒤 관점을 나눠 설계했습니다.
+
+| 관점 | 케이스 |
+|---|---|
+| 경계값 | 이탈 위험 판정의 `14일 = 안정` / `15일 = 주의` 임계값 위·아래 고정 |
+| 예외 입력 | `null` · 파싱 불가 날짜 · 미래 날짜(음수 방지 클램프) |
+| 설정값 폴백 | localStorage 값이 없거나 깨졌을 때 기본값 복귀 |
+
+**CI** — `.github/workflows/ci.yml` 에서 push·PR 마다 `lint → test → build`.
+
+**자동화 준비** — 셀렉터(`data-testid`) · 결정적 시드 · 실패 주입 경로를 갖춰 두었습니다.
+E2E 테스트 작성은 아직 **미착수**이며, 기준은 [docs/E2E.md](docs/E2E.md) 에 있습니다.
+
+### 찾아서 고친 것 (대표 4건)
+
+- **`.env` 없이 클론하면 흰 화면** — import 시점에 `throw` 했습니다. 데모 모드로 전환해 해결
+- **실행 불가능한 SMS 서버를 주요 기능으로 안내** — 의존성이 없어 `node sms-server.cjs` 가 즉시 죽습니다. 기능을 만드는 대신 **경계를 명시**
+- **고정 날짜 시드** — 시간이 지나며 전원이 한 세그먼트로 몰려 대시보드 다섯 칸 중 넷이 항상 0. 상대 날짜로 전환
+- **세그먼트 URL 파라미터가 죽어 있음** — 탭이 쓰기만 하고 아무도 읽지 않아 `?seg=churn` 딥링크가 무효
+
+전체 17건은 [docs/DEFECTS.md](docs/DEFECTS.md) 참고 (15건 수정 · 1건 부분 대응 · 1건 미수정).
+
+---
+
+## 기술 스택
+
 ```
-
-### 빌드
-
-```bash
-# 프로덕션 빌드
-npm run build
-
-# 빌드 결과 미리보기
-npm run preview
-```
-
-### 테스트
-
-```bash
-npm run test
+React 18 · TypeScript · Vite          shadcn/ui · Radix · Tailwind
+TanStack Query · React Router v6      Supabase (선택 — 없으면 데모 모드)
+Vitest · Testing Library              GitHub Actions (lint·test·build)
 ```
 
 ---
 
-## 🔐 인증 흐름
-
-앱은 **localStorage 기반 데모 인증**을 사용합니다.
-
-- `loyalhub:isLoggedIn` — 로그인 여부 저장
-- `loyalhub:user` — 사용자 프로필 저장
-
-| 상태 | 동작 |
-|------|------|
-| 미로그인 상태로 보호 라우트 접근 | `/login` 으로 리다이렉트 |
-| 로그인 상태로 `/login`, `/signup` 접근 | `/` (대시보드)로 리다이렉트 |
-| 앱 새로고침 | localStorage에서 auth 상태 복원 후 라우팅 결정 |
-
-> **isReady** 플래그를 통해 hydration 전 화면 깜빡임(flicker)을 방지합니다.
-
----
-
-## ☁️ 배포
-
-이 프로젝트는 **Vercel**로 배포됩니다.
+## 실제 데이터로 연결하기 (선택)
 
 ```bash
-# Lovable에서 배포
-# Lovable 프로젝트 → Share → Publish 클릭
+cp .env.example .env   # VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY
 ```
 
-또는 Vercel CLI / GitHub 연동으로 자동 배포 가능합니다.
+⚠️ **데모 모드는 "환경변수가 없다" 하나만 가리킵니다.** 환경변수가 있는데 요청이 실패하면
+데모 데이터로 덮지 않고 에러를 드러냅니다 — 실패를 가짜 값으로 가리면
+운영에서 DB가 죽어도 화면이 멀쩡해 보이기 때문입니다.
 
 ---
 
-## 🧑‍💻 어떻게 만들었나
+## 기타
 
-초기 구현은 AI 빌더([Lovable.dev](https://lovable.dev))로 진행했습니다. 원하는 기능을
-자연어로 설명하면 코드가 생성되는 방식이라, 화면·라우팅처럼 정형화된 부분을
-빠르게 세울 수 있었습니다.
+**인증** — `loyalhub:isLoggedIn` · `loyalhub:user` 기반 데모 인증.
+미로그인 시 보호 라우트는 `/login` 으로 리다이렉트하며, `isReady` 플래그로 hydration 깜빡임을 막습니다.
 
-```
-초기 스캐폴딩 (AI 빌더)  →  분석 로직 분리 · 단위 테스트 · CI 구성 (직접)
-```
+**배포** — `vercel.json` 에 SPA 리라이트 설정이 있고, 데모 모드 덕분에 환경변수 없이 그대로 배포됩니다.
+현재 공개된 배포 URL은 없습니다.
 
-다만 그렇게 나온 코드에는 **테스트도, CI도, Hooks 규칙 위반을 잡아줄 장치도
-없었습니다.** 생성 결과를 그대로 두지 않고 검증할 값이 있는 로직을 `lib/` 으로
-분리한 뒤, 경계값·예외 입력 중심으로 테스트를 붙이고 CI 에 태우는 작업을 직접
-했습니다. 자세한 내용은 [품질 관리](#-품질-관리) 참고.
-
----
-
-## 📝 개발 스크립트 정리
-
-| 명령어 | 설명 |
-|--------|------|
-| `npm run dev` | 개발 서버 시작 |
-| `npm run build` | 프로덕션 빌드 |
-| `npm run build:dev` | 개발 모드 빌드 |
-| `npm run preview` | 빌드 결과 미리보기 |
-| `npm run lint` | ESLint 검사 |
-| `npm run test` | 테스트 1회 실행 |
-| `npm run test:watch` | 테스트 watch 모드 |
+**스크립트** — `dev` · `build` · `preview` · `lint` · `test` · `test:watch`

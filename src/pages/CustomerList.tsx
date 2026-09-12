@@ -4,7 +4,7 @@ import type { CustomerGrade } from "@/lib/mockData";
 import GradeBadge from "@/components/GradeBadge";
 import { RiskBadge } from "@/components/RiskBadge";
 import { CustomersSegmentsTabs, type CustomerSegmentKey } from "@/components/CustomersSegmentsTabs";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createCustomer, fetchCustomers } from "@/lib/supabaseApi";
@@ -15,10 +15,16 @@ const grades: (CustomerGrade | "전체")[] = ["전체", "VIP", "단골", "일반
 const CustomerList = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
 
   const [search, setSearch] = useState("");
   const [filterGrade, setFilterGrade] = useState<CustomerGrade | "전체">("전체");
-  const [segment, setSegment] = useState<CustomerSegmentKey>("all");
+  // 🔴 segment 의 출처는 URL 이다.
+  // 예전에는 useState("all") 로 들고 있었고, 탭은 URL 파라미터를 쓰기만 했다.
+  // 아무도 읽지 않아 `/customers?seg=churn` 같은 딥링크가 통째로 죽어 있었다.
+  // (docs/DEFECTS.md D-10)
+  const segment: CustomerSegmentKey =
+    (searchParams.get("seg") as CustomerSegmentKey) || "all";
   const [showAddModal, setShowAddModal] = useState(false);
   const [newName, setNewName] = useState("");
   const [newPhone, setNewPhone] = useState("");
@@ -101,12 +107,19 @@ const CustomerList = () => {
         />
       </div>
 
-      <CustomersSegmentsTabs value={segment} onChange={setSegment} />
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+        상태
+      </p>
+      <CustomersSegmentsTabs value={segment} />
 
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+        등급
+      </p>
       <div className="flex gap-2 mb-4 overflow-x-auto">
         {grades.map(g => (
           <button
             key={g}
+            data-testid={`grade-filter-${g}`}
             onClick={() => setFilterGrade(g)}
             className={`whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-medium transition-all ${
               filterGrade === g
@@ -119,7 +132,7 @@ const CustomerList = () => {
         ))}
       </div>
 
-      <p className="text-xs text-muted-foreground mb-2">
+      <p data-testid="customer-count" className="text-xs text-muted-foreground mb-2">
         {isLoading
           ? "불러오는 중..."
           : isError
@@ -134,6 +147,8 @@ const CustomerList = () => {
           return (
             <li
               key={c.id}
+              data-testid="customer-item"
+              data-customer-name={c.name}
               onClick={() => navigate(`/customers/${c.id}`)}
               className="flex items-center justify-between rounded-2xl border bg-card p-4 cursor-pointer hover:shadow-sm active:scale-[0.99] transition-all"
             >

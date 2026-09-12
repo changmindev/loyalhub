@@ -8,8 +8,9 @@ import {
   fetchCouponHistory,
   fetchCustomers,
 } from "@/lib/supabaseApi";
-import { sendSmsToCustomers } from "@/lib/sms";
+import { isSmsBlocked, sendSmsToCustomers } from "@/lib/sms";
 import { couponTemplates } from "@/lib/couponTemplates";
+import QueryErrorNotice from "@/components/QueryErrorNotice";
 import { useAuth } from "@/contexts/AuthContext";
 
 const targetOptions: (CustomerGrade | "전체")[] = ["전체", "VIP", "단골", "일반"];
@@ -25,12 +26,21 @@ const CouponSend = () => {
   const [scheduleDate, setScheduleDate] = useState("");
   const [scheduleTime, setScheduleTime] = useState("18:00");
 
-  const { data: customers, isLoading: isLoadingCustomers } = useQuery({
+  const {
+    data: customers,
+    isLoading: isLoadingCustomers,
+    isError: isCustomersError,
+    refetch: refetchCustomers,
+  } = useQuery({
     queryKey: ["customers"],
     queryFn: fetchCustomers,
   });
 
-  const { data: couponHistory, isLoading: isLoadingHistory } = useQuery({
+  const {
+    data: couponHistory,
+    isLoading: isLoadingHistory,
+    isError: isHistoryError,
+  } = useQuery({
     queryKey: ["couponHistory"],
     queryFn: fetchCouponHistory,
   });
@@ -74,14 +84,16 @@ const CouponSend = () => {
     const targetCustomers =
       customers?.filter((c) => target === "전체" || c.grade === target) ?? [];
 
+    let smsDelivered = false;
     try {
-      await sendSmsToCustomers({
+      const result = await sendSmsToCustomers({
         text: message.trim(),
         customers: targetCustomers.map((c) => ({
           name: c.name,
           phone: c.phone,
         })),
       });
+      smsDelivered = result.delivered;
     } catch (error) {
       toast.error("SMS 발송 중 오류가 발생했습니다");
       return;
@@ -94,19 +106,45 @@ const CouponSend = () => {
       scheduledAt,
     });
 
+    // 문자가 실제로 나갔는지를 문구에 그대로 반영한다.
+    // 데모인데 "발송 완료"라고 쓰면 화면이 거짓말을 하게 된다.
     if (isScheduled) {
-      toast.success(`${scheduleDate} ${scheduleTime}에 ${targetCount}명에게 예약 발송됩니다!`);
+      toast.success(
+        smsDelivered
+          ? `${scheduleDate} ${scheduleTime}에 ${targetCount}명에게 예약 발송됩니다!`
+          : `데모 — 실제 문자 없이 ${targetCount}명 예약 건으로 기록했습니다`,
+      );
     } else {
-      toast.success(`${targetCount}명에게 발송 완료!`);
+      toast.success(
+        smsDelivered
+          ? `${targetCount}명에게 발송 완료!`
+          : `데모 — 실제 문자 없이 ${targetCount}명 발송 건으로 기록했습니다`,
+      );
     }
   };
 
   return (
     <div className="px-4 pt-6 pb-24 max-w-lg mx-auto">
+      {(isCustomersError || isHistoryError) && (
+        <QueryErrorNotice onRetry={() => refetchCustomers()} />
+      )}
       <h1 className="text-xl font-bold mb-1">쿠폰 / 공지 발송</h1>
-      <p className="text-xs text-muted-foreground mb-4">
+      <p className="text-xs text-muted-foreground mb-3">
         간단한 템플릿을 골라 바로 문자를 보내보세요.
       </p>
+
+      {isSmsBlocked && (
+        <div
+          data-testid="sms-demo-notice"
+          role="note"
+          className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-[11px] leading-relaxed text-amber-900"
+        >
+          <strong className="font-semibold">데모 버전 — 실제 문자는 발송되지 않습니다.</strong>
+          <br />
+          문자 발송은 건당 비용과 발신번호 사전등록이 필요해 이 프로젝트의 범위 밖입니다.
+          대상 산정 · 미리보기 · 발송 이력 기록까지만 동작합니다.
+        </div>
+      )}
 
       {/* 발송 대상 */}
       <div className="rounded-2xl border bg-card p-4 mb-3">
@@ -115,6 +153,7 @@ const CouponSend = () => {
           {targetOptions.map((t) => (
             <button
               key={t}
+              data-testid={`target-option-${t}`}
               onClick={() => setTarget(t)}
               className={`rounded-full px-4 py-1.5 text-xs font-medium transition-all ${
                 target === t
@@ -128,22 +167,25 @@ const CouponSend = () => {
         </div>
         <p className="text-xs text-muted-foreground mt-2">
           대상 고객:{" "}
-          <span className="font-semibold text-foreground">
+          <span data-testid="target-count" className="font-semibold text-foreground">
             {isLoadingCustomers ? "계산 중..." : `${targetCount}명`}
           </span>
         </p>
       </div>
 
       {/* 템플릿 + 메시지 */}
-      <div className="grid gap-3 mb-3">
-        <div className="rounded-2xl border bg-card p-4">
+      {/* min-w-0: grid 자식은 기본 min-width:auto 라 내용보다 작아지지 못한다.
+          이게 없으면 템플릿 가로 스크롤 영역이 카드를 밀어 화면 밖으로 넘친다
+          (390px 화면에서 666px 로 벌어져 페이지에 가로 스크롤이 생겼다) */}
+      <div className="grid gap-3 mb-3 min-w-0">
+        <div className="rounded-2xl border bg-card p-4 min-w-0">
           <div className="flex items-center justify-between mb-2">
             <label className="text-sm font-semibold">추천 문구 템플릿</label>
             <span className="text-[10px] text-muted-foreground">
               클릭하면 내용이 자동으로 입력돼요
             </span>
           </div>
-          <div className="flex gap-2 overflow-x-auto pb-1">
+          <div className="flex gap-2 overflow-x-auto pb-1 min-w-0">
             {couponTemplates.map((tpl) => (
               <button
                 key={tpl.id}
@@ -167,9 +209,10 @@ const CouponSend = () => {
           </div>
         </div>
 
-        <div className="rounded-2xl border bg-card p-4">
+        <div className="rounded-2xl border bg-card p-4 min-w-0">
           <label className="text-sm font-semibold mb-2 block">메시지 내용</label>
           <textarea
+            data-testid="coupon-message"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="예: 이번 주 방문 시 음료 1잔 무료!"
@@ -251,6 +294,7 @@ const CouponSend = () => {
 
       {/* 발송 버튼 */}
       <button
+        data-testid="coupon-send"
         onClick={handleSend}
         disabled={sent}
         className={`w-full rounded-2xl py-3.5 text-sm font-semibold flex items-center justify-center gap-2 transition-all ${
@@ -282,7 +326,7 @@ const CouponSend = () => {
             <li className="text-xs text-muted-foreground">불러오는 중...</li>
           )}
           {couponHistory?.map((c) => (
-            <li key={c.id} className="rounded-2xl border bg-card p-3.5">
+            <li key={c.id} data-testid="coupon-history-item" className="rounded-2xl border bg-card p-3.5">
               <p className="text-sm font-medium">{c.title}</p>
               <p className="text-xs text-muted-foreground mt-1">
                 {c.sentAt} · {c.targetGrade} · {c.sentCount}명

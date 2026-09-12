@@ -15,7 +15,7 @@ const Settings = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["settings"],
     queryFn: fetchSettings,
   });
@@ -71,7 +71,8 @@ const Settings = () => {
 
   return (
     <div className="px-4 pt-6 pb-24 max-w-lg mx-auto">
-      <div className="flex items-center justify-between mb-6">
+      {isError && <QueryErrorNotice onRetry={() => refetch()} />}
+      <div className="flex items-start justify-between gap-3 mb-6">
         <div>
           <h1 className="text-xl font-bold">설정</h1>
           <p className="text-xs text-muted-foreground mt-1">
@@ -81,7 +82,7 @@ const Settings = () => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate("/", { replace: true })}
-            className="text-[11px] text-muted-foreground underline hover:text-foreground"
+            className="text-xs text-muted-foreground underline hover:text-foreground"
           >
             나중에 할게
           </button>
@@ -97,42 +98,26 @@ const Settings = () => {
       <div className="space-y-5">
         <form
           onSubmit={handleSubmit}
-          className="rounded-2xl border bg-card p-4 space-y-4"
+          className="rounded-2xl border bg-card p-4 space-y-5"
         >
-          <div className="flex items-center justify-between mb-1">
-            <label className="text-sm font-semibold">네이버 예약 연동</label>
-            <Badge
-              variant="outline"
-              className="text-[10px] border-yellow-300 bg-yellow-50 text-yellow-800"
+          {/* 실제로 동작하는 설정을 맨 위에 둔다.
+              예전에는 '데모 범위 밖' 두 항목 사이에 끼어 있어서
+              이것도 동작하지 않는 항목으로 읽혔다. */}
+          <div>
+            <label
+              htmlFor="settings-avg-ticket"
+              className="text-sm font-semibold mb-1 block"
             >
-              준비중
-            </Badge>
-          </div>
-          <p className="text-[11px] text-muted-foreground mb-2">
-            네이버 예약센터에서 발급한 키를 저장해두면, 나중에 예약 정보를
-            자동으로 가져올 수 있습니다. (현재는 표시만, 연동 준비중)
-          </p>
-          <input
-            type="text"
-            value={form.naverApiKey}
-            onChange={handleChange("naverApiKey")}
-            placeholder="NAVER_RESERVED_API_KEY"
-            className="w-full rounded-xl border bg-background px-4 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-            disabled={isLoading || saveMutation.isPending}
-          />
-
-          <div className="h-px bg-border my-2" />
-
-          <div className="mb-2">
-            <label className="text-sm font-semibold mb-1 block">
               매장 평균 객단가
             </label>
             <p className="text-[11px] text-muted-foreground mb-2">
               한 번 방문했을 때 손님이 대략 얼마나 쓰는지 금액을 적어주세요.
-              고객 가치(예상 매출)을 계산할 때 사용됩니다.
+              고객 가치(예상 매출)를 계산할 때 사용됩니다.
             </p>
             <div className="flex items-center gap-2">
               <input
+                id="settings-avg-ticket"
+                data-testid="settings-avg-ticket"
                 type="number"
                 min={0}
                 value={averageTicket}
@@ -140,57 +125,85 @@ const Settings = () => {
                 placeholder="예: 12000"
                 className="w-full rounded-xl border bg-background px-4 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
-              <span className="text-xs text-muted-foreground">원</span>
+              <span className="text-xs text-muted-foreground shrink-0">원</span>
             </div>
           </div>
 
-          <div className="flex items-center justify-between mb-1">
-            <label className="text-sm font-semibold">카카오 채널 연동</label>
-            <Badge
-              variant="outline"
-              className="text-[10px] border-yellow-300 bg-yellow-50 text-yellow-800"
-            >
-              준비중
-            </Badge>
+          <div className="border-t pt-4">
+            <div className="flex items-center justify-between mb-1">
+              <h2 className="text-sm font-semibold">외부 서비스 연동</h2>
+              <Badge
+                variant="outline"
+                className="text-[10px] border-yellow-300 bg-yellow-50 text-yellow-800"
+              >
+                데모 범위 밖
+              </Badge>
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              아래 두 항목은 <strong className="font-semibold">입력값 저장까지만</strong> 동작합니다.
+              실제 연동은 하지 않습니다.
+            </p>
           </div>
-          <p className="text-[11px] text-muted-foreground mb-2">
-            카카오톡 채널 관리자센터의 채널 ID를 저장해두면, 향후 알림톡/친구톡
-            발송 기능과 연동할 수 있습니다.
-          </p>
-          <input
-            type="text"
-            value={form.kakaoChannelId}
-            onChange={handleChange("kakaoChannelId")}
-            placeholder="@your_channel_id"
-            className="w-full rounded-xl border bg-background px-4 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-            disabled={isLoading || saveMutation.isPending}
-          />
+
+          <div>
+            <label
+              htmlFor="settings-naver-key"
+              className="text-sm font-semibold mb-1 block"
+            >
+              네이버 예약 연동
+            </label>
+            <p className="text-[11px] text-muted-foreground mb-2">
+              네이버 예약센터에서 발급한 키를 저장해두면, 나중에 예약 정보를
+              자동으로 가져올 수 있습니다.
+            </p>
+            <input
+              id="settings-naver-key"
+              data-testid="settings-naver-key"
+              type="text"
+              value={form.naverApiKey}
+              onChange={handleChange("naverApiKey")}
+              placeholder="NAVER_RESERVED_API_KEY"
+              className="w-full rounded-xl border bg-background px-4 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+              disabled={isLoading || saveMutation.isPending}
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="settings-kakao-id"
+              className="text-sm font-semibold mb-1 block"
+            >
+              카카오 채널 연동
+            </label>
+            <p className="text-[11px] text-muted-foreground mb-2">
+              카카오톡 채널 관리자센터의 채널 ID를 저장해두면, 향후 알림톡·친구톡
+              발송 기능과 연동할 수 있습니다.
+            </p>
+            <input
+              id="settings-kakao-id"
+              data-testid="settings-kakao-id"
+              type="text"
+              value={form.kakaoChannelId}
+              onChange={handleChange("kakaoChannelId")}
+              placeholder="@your_channel_id"
+              className="w-full rounded-xl border bg-background px-4 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+              disabled={isLoading || saveMutation.isPending}
+            />
+          </div>
 
           <button
             type="submit"
+            data-testid="settings-save"
             disabled={isLoading || saveMutation.isPending}
-            className="mt-3 w-full rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground active:opacity-90 transition-opacity"
+            className="w-full rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground active:opacity-90 transition-opacity disabled:opacity-60"
           >
-            {saveMutation.isPending ? "저장 중..." : "설정 저장하기"}
+            {saveMutation.isPending ? "저장 중..." : "설정 전체 저장"}
           </button>
         </form>
 
-        <div className="rounded-2xl border bg-card p-4 text-[11px] text-muted-foreground space-y-1.5">
-          <p className="font-semibold text-xs text-foreground">
-            B2C SaaS 판매용 기본 구조
-          </p>
-          <p>
-            - 이 화면은 로그인 후 진입하는 Admin 설정 페이지입니다.
-          </p>
-          <p>
-            - 네이버 예약 / 카카오 채널 값은 Supabase{" "}
-            <code className="px-1 py-0.5 rounded bg-muted text-[10px]">
-              settings
-            </code>{" "}
-            테이블에 저장됩니다.
-          </p>
-          <p>- 실제 외부 API 연동은 추후에 붙일 수 있도록 설계되어 있습니다.</p>
-        </div>
+        <p className="px-1 text-[11px] leading-relaxed text-muted-foreground">
+          객단가는 대시보드의 고객 가치·캠페인 효과 추정에 바로 반영됩니다.
+        </p>
       </div>
     </div>
   );

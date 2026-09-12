@@ -1,5 +1,6 @@
 import { Users, UserCheck, Ticket, TrendingUp, ArrowRight } from "lucide-react";
 import StatCard from "@/components/StatCard";
+import QueryErrorNotice from "@/components/QueryErrorNotice";
 import GradeBadge from "@/components/GradeBadge";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -13,11 +14,15 @@ import { DailyTip } from "@/components/DailyTip";
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { data: customers } = useQuery({
+  const {
+    data: customers,
+    isError: isCustomersError,
+    refetch: refetchCustomers,
+  } = useQuery({
     queryKey: ["customers"],
     queryFn: fetchCustomers,
   });
-  const { data: couponHistory } = useQuery({
+  const { data: couponHistory, isError: isCouponsError } = useQuery({
     queryKey: ["couponHistory"],
     queryFn: fetchCouponHistory,
   });
@@ -40,6 +45,11 @@ const Dashboard = () => {
   const ownerName = user?.name ? `${user.name}님` : "사장님";
 
   // 오늘 할 일: 간단한 규칙 기반 세그먼트
+  //
+  // ⚠️ stale7 은 "7일 이상"이 아니라 **7~30일** 구간이다. 30일을 넘기면
+  // dangerCustomers(이탈 위험)로 넘어간다. 라벨을 `7일 이상 안 온 손님`으로
+  // 달아 두었더니 `7일 이상 0명 / 이탈 위험 8명` 이 같이 떠서 모순으로 읽혔다.
+  // (docs/DEFECTS.md D-07)
   const stale7 =
     customers?.filter((c) => {
       const d = daysSince(c.lastVisit);
@@ -61,6 +71,9 @@ const Dashboard = () => {
 
   return (
     <div className="px-4 pt-6 pb-24 max-w-lg mx-auto">
+      {(isCustomersError || isCouponsError) && (
+        <QueryErrorNotice onRetry={() => refetchCustomers()} />
+      )}
       <div className="mb-6">
         <p className="text-sm text-muted-foreground">{todayStr}</p>
         <h1 className="text-xl font-bold mt-0.5">안녕하세요, {ownerName} ☕</h1>
@@ -83,9 +96,21 @@ const Dashboard = () => {
           />
         </div>
         <ul className="text-[11px] text-muted-foreground space-y-0.5">
-          <li>{onboardingSteps[2] ? "✓" : "•"} 매장 정보/회원가입 완료</li>
-          <li>{onboardingSteps[0] ? "✓" : "•"} 고객 데이터 등록</li>
-          <li>{onboardingSteps[1] ? "✓" : "•"} 첫 쿠폰/공지 발송</li>
+          {[
+            { done: onboardingSteps[2], label: "매장 정보 등록" },
+            { done: onboardingSteps[0], label: "고객 데이터 등록" },
+            { done: onboardingSteps[1], label: "첫 쿠폰·공지 발송" },
+          ].map((step) => (
+            <li
+              key={step.label}
+              className={
+                step.done ? "text-muted-foreground" : "font-medium text-foreground"
+              }
+            >
+              <span className="inline-block w-4">{step.done ? "✓" : "•"}</span>
+              {step.label}
+            </li>
+          ))}
         </ul>
       </div>
 
@@ -95,10 +120,10 @@ const Dashboard = () => {
           <h2 className="text-sm font-semibold">오늘 하면 좋은 일</h2>
         </div>
         <ul className="space-y-2 text-xs">
-          <li className="flex items-center justify-between">
+          <li className="flex items-center justify-between gap-3">
             <div>
               <p className="font-medium">
-                7일 이상 안 온 손님 {stale7}명
+                7~30일 미방문 <span data-testid="segment-stale7">{stale7}</span>명
               </p>
               <p className="text-[11px] text-muted-foreground">
                 조용히 한 번 더 초대해 보세요.
@@ -106,32 +131,33 @@ const Dashboard = () => {
             </div>
             <button
               onClick={() => navigate("/coupon")}
-              className="text-[11px] rounded-full px-3 py-1 bg-primary text-primary-foreground font-semibold"
+              className="shrink-0 whitespace-nowrap min-w-[104px] text-center text-[11px] rounded-full px-3 py-1.5 bg-primary text-primary-foreground font-semibold"
             >
               쿠폰 보내기
             </button>
           </li>
-          <li className="flex items-center justify-between">
+          <li className="flex items-center justify-between gap-3">
             <div>
               <p className="font-medium">
-                이탈 위험 고객 {dangerCustomers}명
+                이탈 위험 고객 <span data-testid="segment-danger">{dangerCustomers}</span>명
               </p>
               <p className="text-[11px] text-muted-foreground">
                 한 번만 더 챙기면 단골로 이어질 수 있어요.
               </p>
             </div>
             <button
-              onClick={() => navigate("/customers")}
-              className="text-[11px] rounded-full px-3 py-1 bg-secondary text-secondary-foreground font-semibold"
+              // 라벨이 "이탈 위험 고객"이므로 그 세그먼트로 연다.
+              onClick={() => navigate("/customers?seg=churn")}
+              className="shrink-0 whitespace-nowrap min-w-[104px] text-center text-[11px] rounded-full px-3 py-1.5 bg-secondary text-secondary-foreground font-semibold"
             >
               고객 리스트 보기
             </button>
           </li>
-          <li className="flex items-center justify-between opacity-70">
+          <li className="flex items-center justify-between gap-3 opacity-70">
             <div>
               <p className="font-medium">생일/기념일 고객</p>
               <p className="text-[11px] text-muted-foreground">
-                고객 생일 정보를 연결하면 자동으로 추천해 드릴게요. (준비중)
+                고객 생일 정보를 연결하면 자동으로 추천해 드릴게요. (데모 범위 밖)
               </p>
             </div>
           </li>
@@ -139,10 +165,10 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-2 gap-3 mb-5">
-        <StatCard icon={UserCheck} label="오늘 방문" value={todayVisitors} sub="명" />
-        <StatCard icon={Users} label="전체 단골" value={totalCustomers} sub="명" />
-        <StatCard icon={TrendingUp} label="VIP 고객" value={vipCount} sub="명" />
-        <StatCard icon={Ticket} label="최근 쿠폰" value={latestCoupon?.sentCount || 0} sub="명 발송" />
+        <StatCard icon={UserCheck} label="오늘 방문" value={todayVisitors} sub="명" testId="stat-today-visitors" />
+        <StatCard icon={Users} label="전체 단골" value={totalCustomers} sub="명" testId="stat-total-customers" />
+        <StatCard icon={TrendingUp} label="VIP 고객" value={vipCount} sub="명" testId="stat-vip" />
+        <StatCard icon={Ticket} label="최근 쿠폰" value={latestCoupon?.sentCount || 0} sub="명 발송" testId="stat-recent-coupon" />
       </div>
 
       {latestCoupon && (

@@ -58,8 +58,11 @@ const Signup = () => {
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="block text-xs font-semibold mb-1.5">이메일</label>
+            <label htmlFor="signup-email" className="block text-xs font-semibold mb-1.5">이메일</label>
             <input
+              id="signup-email"
+              name="email"
+              data-testid="signup-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -69,10 +72,13 @@ const Signup = () => {
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold mb-1.5">
+            <label htmlFor="signup-password" className="block text-xs font-semibold mb-1.5">
               비밀번호
             </label>
             <input
+              id="signup-password"
+              name="password"
+              data-testid="signup-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -82,10 +88,13 @@ const Signup = () => {
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold mb-1.5">
+            <label htmlFor="signup-password-confirm" className="block text-xs font-semibold mb-1.5">
               비밀번호 확인
             </label>
             <input
+              id="signup-password-confirm"
+              name="passwordConfirm"
+              data-testid="signup-password-confirm"
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
@@ -100,10 +109,13 @@ const Signup = () => {
             )}
           </div>
           <div>
-            <label className="block text-xs font-semibold mb-1.5">
+            <label htmlFor="signup-store-name" className="block text-xs font-semibold mb-1.5">
               매장명 <span className="text-muted-foreground">(선택)</span>
             </label>
             <input
+              id="signup-store-name"
+              name="storeName"
+              data-testid="signup-store-name"
               type="text"
               value={shopName}
               onChange={(e) => setShopName(e.target.value)}
@@ -112,10 +124,13 @@ const Signup = () => {
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold mb-1.5">
+            <label htmlFor="signup-category" className="block text-xs font-semibold mb-1.5">
               매장 분야 <span className="text-muted-foreground">(선택)</span>
             </label>
             <select
+              id="signup-category"
+              name="category"
+              data-testid="signup-category"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               className="w-full rounded-xl border bg-background px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
@@ -129,6 +144,7 @@ const Signup = () => {
           </div>
 
           <button
+            data-testid="signup-submit"
             type="submit"
             disabled={isSubmitting || (!!confirmPassword && password !== confirmPassword)}
             className="mt-1 w-full rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground active:opacity-90 transition-opacity"
