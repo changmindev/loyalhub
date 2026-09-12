@@ -28,3 +28,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# 락파일은 package-lock.json 하나만 쓴다 (CI 가 npm ci 를 돌린다)
+bun.lockb
