@@ -50,7 +50,11 @@ await page.addInitScript(() => {
 **날짜가 아니라 버킷 인원수**를 검증한다. 고정 날짜였을 때는 시간이 지나며
 전원이 "이탈 위험" 한 칸으로 몰려 세그먼트 다섯 중 넷이 항상 0이었다.
 
-판정 기준은 `src/lib/analytics.ts` `getRiskLevel` — `≤14 안정 / ≤30 주의 / 초과 위험`.
+판정 기준은 `src/lib/analytics.ts` `getRiskLevel`:
+`이력 없음 = 방문 전(none) / ≤14 안정(ok) / ≤30 주의(warn) / 초과 이탈 위험(danger)`.
+
+🔴 **`none` 은 `warn` 과 다른 상태다.** 한 번도 안 온 사람을 '주의'로 뭉뚱그리던 것이
+D-20 이었다. 배지는 색이 아니라 `[data-testid="risk-badge"][data-risk-level="none"]` 로 단언한다.
 
 | 버킷 | 경과일 | 인원 | 대상 화면 |
 |---|---|---|---|
@@ -58,7 +62,7 @@ await page.addInitScript(() => {
 | 이번 주 (≤7일) | 0·1·3·5 | **4** | 목록 `segment-tab-this-week` |
 | 7~30일 미방문 | 9·21 | **2** | 대시보드 `segment-stale7` |
 | 이탈 위험 (>30일) | 38·64·120 | **3** | 목록 `segment-tab-churn`, 대시보드 `segment-danger` |
-| 방문 이력 없음 | — | **1** | `daysSince(null)` 분기 (서지호) |
+| 방문 이력 없음 | — | **1** | `daysSince(null)` → `risk-badge[data-risk-level=none]` (서지호) |
 | 전체 | | **10** | 대시보드 `stat-total-customers` |
 | VIP | | **3** | 대시보드 `stat-vip`, 목록 `segment-tab-vip` |
 
@@ -76,6 +80,18 @@ await page.addInitScript(() => {
 ⚠️ `daysAgo()` 는 **UTC 기준**이다(대시보드의 '오늘' 판정과 기준을 맞춤).
 UTC 자정을 걸쳐 실행되면 '오늘 방문' 버킷이 흔들릴 수 있다 — 드물지만 알고 있을 것.
 
+### 날짜 형식 계약
+
+🔴 **저장되는 날짜는 전부 `YYYY-MM-DD`(UTC)다.** `lastVisit` · `sentAt` 모두 해당한다.
+쓰는 경로는 `analytics.toISODate()` 하나로 모았다.
+
+화면에 보이는 형식은 `YYYY.MM.DD` 다 — `formatKoreanDate()` 를 거친다.
+**날짜를 그대로 출력하는 화면은 없다.** 이력이 없으면 `-`.
+
+예전에는 시드가 `2026-09-12`, 새로 쓴 값이 `2026-09-12T05:10:15.074Z` 라
+같은 필드에 두 형식이 섞여 있었고 화면마다 다르게 보였다(D-18·D-19).
+**단언할 형식이 정해져 있다는 게 이 문단의 요점이다.**
+
 ---
 
 ## 4. 셀렉터
@@ -85,14 +101,19 @@ UTC 자정을 걸쳐 실행되면 '오늘 방문' 버킷이 흔들릴 수 있다
 
 | 화면 | testid |
 |---|---|
-| 공통 | `demo-banner` · `query-error` · `query-error-retry` |
+| 공통 | `demo-banner` · `query-error` · `query-error-retry` · `error-boundary` · `error-boundary-reload` |
 | 로그인 | `login-email` · `login-password` · `login-submit` |
 | 회원가입 | `signup-email` · `signup-password` · `signup-password-confirm` · `signup-store-name` · `signup-category` · `signup-submit` |
 | 대시보드 | `stat-today-visitors` · `stat-total-customers` · `stat-vip` · `stat-recent-coupon` · `segment-stale7` · `segment-danger` |
-| 단골 목록 | `customer-count` · `customer-item`(+`data-customer-name`) · `grade-filter-{전체\|VIP\|단골\|일반}` · `segment-tab-{all\|vip\|churn\|this-week}` |
+| 단골 목록 | `customer-count` · `customer-item`(+`data-customer-name`) · `grade-filter-{전체\|VIP\|단골\|일반}` · `segment-tab-{all\|vip\|churn\|this-week}`(+`aria-pressed`) |
+| 위험도 배지 | `risk-badge`(+`data-risk-level={none\|ok\|warn\|danger}`) |
 | 쿠폰 발송 | `sms-demo-notice` · `target-option-{전체\|VIP\|단골\|일반}` · `target-count` · `coupon-message` · `coupon-send` · `coupon-history-item` |
 
 입력칸은 `<label for>` 로 연결돼 있어 `getByLabel("이메일")` 도 쓸 수 있다.
+
+**상태는 클래스가 아니라 속성으로 읽는다.**
+세그먼트 탭의 활성 여부는 `aria-pressed`, 위험도는 `data-risk-level` 이다.
+예전에는 둘 다 Tailwind 클래스에만 있어서, 디자인을 손대면 테스트가 조용히 깨졌다(D-21).
 
 세그먼트는 **URL 이 단일 출처**다 — `/customers?seg={all|vip|churn|this-week}` 으로
 바로 진입할 수 있어 탭을 클릭하지 않고 필터 상태를 만들 수 있다. (D-10 에서 고친 부분)
