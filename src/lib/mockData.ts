@@ -54,7 +54,8 @@ export function daysAgo(n: number): string {
 
 /**
  * 검증 버킷 — 이 표가 곧 E2E 가 기대하는 값이다.
- * 판정 기준은 analytics.ts 의 getRiskLevel(≤14 안정 / ≤30 주의 / 초과 위험).
+ * 판정 기준은 analytics.ts 의 getRiskLevel
+ * (이력 없음 = 방문 전 / ≤14 안정 / ≤30 주의 / 초과 이탈 위험).
  *
  * | 버킷            | 경과일   | 인원 |
  * |-----------------|---------|------|

@@ -77,8 +77,8 @@ describe("daysSince", () => {
 });
 
 describe("getRiskLevel — 경계값", () => {
-  it("null이면 warn", () => {
-    expect(getRiskLevel(null)).toBe("warn");
+  it("null이면 none — 한 번도 안 온 사람은 '주의'가 아니다", () => {
+    expect(getRiskLevel(null)).toBe("none");
   });
 
   it("14일은 ok, 15일은 warn (경계 바로 위/아래)", () => {
@@ -98,6 +98,7 @@ describe("getRiskLevel — 경계값", () => {
 
 describe("getRiskLabel", () => {
   it("각 레벨에 맞는 한글 라벨을 반환한다", () => {
+    expect(getRiskLabel("none")).toBe("방문 전");
     expect(getRiskLabel("ok")).toBe("안정");
     expect(getRiskLabel("warn")).toBe("주의");
     expect(getRiskLabel("danger")).toBe("이탈 위험");

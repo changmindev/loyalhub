@@ -1,4 +1,13 @@
-export type RiskLevel = "ok" | "warn" | "danger";
+/**
+ * 방문 최신도 기준 상태.
+ *
+ * `none` 은 **아직 한 번도 오지 않은 사람**이다. 이탈 위험도와는 다른 축이라
+ * 예전처럼 `warn` 으로 뭉뚱그리지 않는다. 관계가 식어가는 손님에게는
+ * 재방문 쿠폰이 맞지만, 한 번도 안 온 사람에게는 첫 방문 유도가 맞다.
+ * 대시보드도 이 사람을 '7~30일 미방문'에 넣지 않으므로,
+ * 상세 화면만 '주의'라고 하면 두 화면의 말이 달라진다.
+ */
+export type RiskLevel = "none" | "ok" | "warn" | "danger";
 
 export const AVERAGE_TICKET_STORAGE_KEY = "loyalhub:avgTicket";
 export const CONVERSION_RATE_STORAGE_KEY = "loyalhub:conversionRate";
@@ -44,7 +53,7 @@ export function daysSince(dateStr: string | null | undefined): number | null {
 
 // 방문 경과일 기준 위험도 레벨 계산
 export function getRiskLevel(days: number | null): RiskLevel {
-  if (days == null) return "warn";
+  if (days == null) return "none";
   if (days <= 14) return "ok";
   if (days <= 30) return "warn";
   return "danger";
@@ -52,6 +61,8 @@ export function getRiskLevel(days: number | null): RiskLevel {
 
 export function getRiskLabel(level: RiskLevel): string {
   switch (level) {
+    case "none":
+      return "방문 전";
     case "ok":
       return "안정";
     case "warn":
