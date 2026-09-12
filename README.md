@@ -9,7 +9,7 @@
 **결함을 찾아 고치고 · 테스트를 붙이고 · 자동화 가능한 상태로 정비하는 작업은 직접** 했습니다.
 
 ```bash
-git clone https://github.com/changmindev/sideproject.git && cd sideproject
+git clone https://github.com/changmindev/loyalhub.git && cd loyalhub
 npm install
 npm run dev          # → http://localhost:8080
 ```
