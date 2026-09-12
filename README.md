@@ -27,6 +27,7 @@ npm run dev          # → http://localhost:8080
 | **[docs/SECURITY.md](docs/SECURITY.md)** | 보안 점검 — 응답 헤더 · 개발 서버 노출 · **고치지 않기로 한 것과 그 이유** |
 | **[docs/E2E.md](docs/E2E.md)** | 자동화 기준 — localStorage 계약 · 검증 버킷 · 셀렉터 · 실패 주입법 |
 | `src/lib/analytics.test.ts` | 분석 로직 단위 테스트 26케이스 (경계값 · 예외 입력 · 폴백) |
+| `src/components/ErrorBoundary.test.tsx` | 렌더 에러가 흰 화면이 되지 않는지 4케이스 |
 
 ---
 
