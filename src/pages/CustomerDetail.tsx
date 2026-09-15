@@ -128,21 +128,18 @@ const CustomerDetail = () => {
       </button>
 
       {/* 프로필 헤더 */}
-      <div className="rounded-2xl border bg-card p-6 mb-4 text-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5" />
-        <div className="relative">
-          <div className="h-18 w-18 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center text-2xl font-bold text-primary mx-auto mb-3 h-[72px] w-[72px]">
-            {customer.name[0]}
-          </div>
-          <h1 className="text-lg font-bold">{customer.name}</h1>
-          <div className="flex items-center justify-center gap-2 mt-1 text-sm text-muted-foreground">
-            <Phone className="h-3.5 w-3.5" />
-            {customer.phone}
-          </div>
-          <div className="mt-3 flex items-center justify-center gap-2">
-            <GradeBadge grade={grade} />
-            <RiskBadge level={risk} />
-          </div>
+      <div className="rounded-2xl bg-banner text-banner-foreground p-6 mb-4 text-center">
+        <div className="h-[72px] w-[72px] rounded-full bg-highlight flex items-center justify-center text-2xl font-display font-extrabold text-highlight-foreground mx-auto mb-3">
+          {customer.name[0]}
+        </div>
+        <h1 className="font-display text-lg font-bold">{customer.name}</h1>
+        <div className="flex items-center justify-center gap-2 mt-1 text-sm text-banner-foreground/70">
+          <Phone className="h-3.5 w-3.5" />
+          {customer.phone}
+        </div>
+        <div className="mt-3 flex items-center justify-center gap-2">
+          <GradeBadge grade={grade} />
+          <RiskBadge level={risk} />
         </div>
       </div>
 
@@ -151,12 +148,12 @@ const CustomerDetail = () => {
         <button
           type="button"
           onClick={handleAddVisit}
-          className="rounded-2xl border bg-card p-4 text-center active:scale-[0.99] transition-transform"
+          className="rounded-2xl bg-highlight text-highlight-foreground p-4 text-center shadow-sm active:scale-[0.99] transition-transform"
         >
-          <p className="text-3xl font-bold text-primary">{customer.visitCount}</p>
-          <p className="text-xs text-muted-foreground mt-1">총 방문 (탭하여 +1)</p>
+          <p className="font-display text-3xl font-extrabold">{customer.visitCount}</p>
+          <p className="text-xs text-highlight-foreground/80 mt-1">총 방문 (탭하여 +1)</p>
         </button>
-        <div className="rounded-2xl border bg-card p-4 text-center">
+        <div className="rounded-2xl bg-card p-4 text-center shadow-sm">
           <p className="text-sm font-semibold">
             {formatKoreanDate(customer.lastVisit)}
           </p>
@@ -169,7 +166,7 @@ const CustomerDetail = () => {
 
       {/* 고객 가치 (매출 관점) */}
       <div className="grid grid-cols-2 gap-3 mb-4">
-        <div className="rounded-2xl border bg-card p-4">
+        <div className="rounded-2xl bg-card shadow-sm p-4">
           <p className="text-xs text-muted-foreground mb-1">예상 누적 매출</p>
           <p className="text-lg font-bold">
             {value.totalRevenue.toLocaleString()}원
@@ -178,7 +175,7 @@ const CustomerDetail = () => {
             방문 횟수 x 평균 객단가
           </p>
         </div>
-        <div className="rounded-2xl border bg-card p-4">
+        <div className="rounded-2xl bg-card shadow-sm p-4">
           <p className="text-xs text-muted-foreground mb-1">최근 90일 추정 매출</p>
           <p className="text-lg font-bold">
             {value.recent90Days.toLocaleString()}원
@@ -187,7 +184,7 @@ const CustomerDetail = () => {
             전체 매출의 약 40% 기준 (추정)
           </p>
         </div>
-        <div className="rounded-2xl border bg-card p-4 col-span-2">
+        <div className="rounded-2xl bg-card shadow-sm p-4 col-span-2">
           <div className="flex items-baseline justify-between">
             <div>
               <p className="text-xs text-muted-foreground mb-1">방문당 평균 매출</p>
@@ -210,7 +207,7 @@ const CustomerDetail = () => {
       {/* 쿠폰 발송 바로가기 */}
       <button
         onClick={() => navigate('/coupon')}
-        className="w-full rounded-2xl border bg-card p-4 mb-4 flex items-center justify-between hover:shadow-sm transition-shadow group"
+        className="w-full rounded-2xl bg-card shadow-sm p-4 mb-4 flex items-center justify-between hover:shadow-sm transition-shadow group"
       >
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -225,7 +222,7 @@ const CustomerDetail = () => {
       </button>
 
       {/* 등급 변경 */}
-      <div className="rounded-2xl border bg-card p-4 mb-4">
+      <div className="rounded-2xl bg-card shadow-sm p-4 mb-4">
         <label className="text-sm font-semibold mb-3 flex items-center gap-1.5">
           <Star className="h-3.5 w-3.5 text-primary" /> 등급 변경
         </label>
@@ -250,7 +247,7 @@ const CustomerDetail = () => {
       </div>
 
       {/* 메모 */}
-      <div className="rounded-2xl border bg-card p-4 mb-4">
+      <div className="rounded-2xl bg-card shadow-sm p-4 mb-4">
         <label className="text-sm font-semibold mb-2 flex items-center gap-1.5">
           <MessageSquare className="h-3.5 w-3.5 text-primary" /> 메모
         </label>
@@ -276,7 +273,7 @@ const CustomerDetail = () => {
       </div>
 
       {/* 방문 이력 타임라인 (DB에는 단일 last_visit만 있으므로 간단한 안내만 표시) */}
-      <div className="rounded-2xl border bg-card p-4">
+      <div className="rounded-2xl bg-card shadow-sm p-4">
         <h2 className="text-sm font-semibold mb-2 flex items-center gap-1.5">
           <Calendar className="h-3.5 w-3.5 text-primary" /> 방문 이력
         </h2>

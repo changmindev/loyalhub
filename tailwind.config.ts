@@ -16,6 +16,8 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Noto Sans KR', 'sans-serif'],
+        display: ['Urbanist', 'Noto Sans KR', 'sans-serif'],
+        body: ['Epilogue', 'Noto Sans KR', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -71,6 +73,15 @@ export default {
           DEFAULT: "hsl(var(--normal))",
           foreground: "hsl(var(--normal-foreground))",
         },
+        highlight: {
+          DEFAULT: "hsl(var(--highlight))",
+          foreground: "hsl(var(--highlight-foreground))",
+        },
+        banner: {
+          DEFAULT: "hsl(var(--banner))",
+          foreground: "hsl(var(--banner-foreground))",
+        },
+        "accent-strong": "hsl(var(--accent-strong))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

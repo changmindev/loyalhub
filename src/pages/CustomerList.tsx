@@ -87,32 +87,32 @@ const CustomerList = () => {
   return (
     <div className="px-4 pt-6 pb-24 max-w-lg mx-auto">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-bold">단골 목록</h1>
+        <h1 className="font-display text-2xl font-extrabold">단골 목록</h1>
         <button
           onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-4 py-2 text-xs font-semibold shadow-sm active:opacity-90 transition-opacity"
+          className="flex items-center gap-1.5 rounded-full bg-highlight text-highlight-foreground px-4 py-2 text-xs font-semibold active:opacity-90 transition-opacity"
         >
           <Plus className="h-3.5 w-3.5" /> 새 고객
         </button>
       </div>
 
-      <div className="relative mb-3">
+      <div className="relative mb-4">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <input
           type="text"
           placeholder="이름 또는 전화번호 검색"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="w-full rounded-xl border bg-card pl-9 pr-4 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+          className="w-full rounded-2xl bg-card pl-9 pr-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
         />
       </div>
 
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+      <p className="font-display text-[10px] font-bold uppercase tracking-widest text-accent-strong mb-1.5">
         상태
       </p>
       <CustomersSegmentsTabs value={segment} />
 
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+      <p className="font-display text-[10px] font-bold uppercase tracking-widest text-accent-strong mb-1.5">
         등급
       </p>
       <div className="flex gap-2 mb-4 overflow-x-auto">
@@ -123,7 +123,7 @@ const CustomerList = () => {
             onClick={() => setFilterGrade(g)}
             className={`whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-medium transition-all ${
               filterGrade === g
-                ? 'bg-primary text-primary-foreground shadow-sm'
+                ? 'bg-highlight text-highlight-foreground'
                 : 'bg-secondary text-secondary-foreground'
             }`}
           >
@@ -150,7 +150,7 @@ const CustomerList = () => {
               data-testid="customer-item"
               data-customer-name={c.name}
               onClick={() => navigate(`/customers/${c.id}`)}
-              className="flex items-center justify-between rounded-2xl border bg-card p-4 cursor-pointer hover:shadow-sm active:scale-[0.99] transition-all"
+              className="flex items-center justify-between rounded-2xl bg-card p-4 cursor-pointer shadow-sm hover:shadow-md active:scale-[0.99] transition-all"
             >
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/15 to-accent/15 flex items-center justify-center text-sm font-semibold text-primary">
@@ -211,7 +211,7 @@ const CustomerList = () => {
             </div>
             <button
               onClick={handleAddCustomer}
-              className="mt-5 w-full rounded-xl bg-primary py-3.5 text-sm font-semibold text-primary-foreground active:opacity-90 transition-opacity"
+              className="mt-5 w-full rounded-xl bg-highlight py-3.5 text-sm font-semibold text-highlight-foreground active:opacity-90 transition-opacity"
             >
               등록하기
             </button>

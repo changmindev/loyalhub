@@ -75,8 +75,14 @@ const Dashboard = () => {
         <QueryErrorNotice onRetry={() => refetchCustomers()} />
       )}
       <div className="mb-6">
-        <p className="text-sm text-muted-foreground">{todayStr}</p>
-        <h1 className="text-xl font-bold mt-0.5">안녕하세요, {ownerName} ☕</h1>
+        <p className="font-display text-xs font-bold uppercase tracking-widest text-accent-strong">
+          {formatKoreanDate(todayStr)}
+        </p>
+        <h1 className="font-display text-2xl font-extrabold mt-1 leading-snug">
+          안녕하세요,
+          <br />
+          <span className="text-accent-strong">{ownerName}</span> ☕
+        </h1>
       </div>
 
       <DashboardTopBanner targetCount={stale7} />
@@ -165,26 +171,29 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-2 gap-3 mb-5">
-        <StatCard icon={UserCheck} label="오늘 방문" value={todayVisitors} sub="명" testId="stat-today-visitors" />
+        <StatCard icon={UserCheck} label="오늘 방문" value={todayVisitors} sub="명" testId="stat-today-visitors" variant="highlight" />
         <StatCard icon={Users} label="전체 단골" value={totalCustomers} sub="명" testId="stat-total-customers" />
         <StatCard icon={TrendingUp} label="VIP 고객" value={vipCount} sub="명" testId="stat-vip" />
         <StatCard icon={Ticket} label="최근 쿠폰" value={latestCoupon?.sentCount || 0} sub="명 발송" testId="stat-recent-coupon" />
       </div>
 
       {latestCoupon && (
-        <div
+        <button
+          type="button"
           onClick={() => navigate("/coupon")}
-          className="rounded-2xl border bg-card p-4 mb-5 cursor-pointer hover:shadow-sm transition-shadow group"
+          className="w-full text-left rounded-2xl bg-banner text-banner-foreground p-4 mb-5 flex items-center justify-between gap-3 active:opacity-90 transition-opacity"
         >
-          <div className="flex items-center justify-between mb-1.5">
-            <h2 className="text-sm font-semibold">최근 발송 쿠폰</h2>
-            <ArrowRight className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
+          <div className="min-w-0">
+            <h2 className="text-xs font-semibold text-banner-foreground/70 mb-1">최근 발송 쿠폰</h2>
+            <p className="font-display text-base font-bold truncate">{latestCoupon.title}</p>
+            <p className="text-xs text-banner-foreground/70 mt-1">
+              {formatKoreanDate(latestCoupon.sentAt)} · {latestCoupon.targetGrade} 대상 · {latestCoupon.sentCount}명
+            </p>
           </div>
-          <p className="text-sm font-medium">{latestCoupon.title}</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            {formatKoreanDate(latestCoupon.sentAt)} · {latestCoupon.targetGrade} 대상 · {latestCoupon.sentCount}명
-          </p>
-        </div>
+          <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-highlight text-highlight-foreground px-3.5 py-2 text-xs font-semibold">
+            관리하기 <ArrowRight className="h-3 w-3" />
+          </span>
+        </button>
       )}
 
       <CampaignImpactCards campaigns={couponHistory || []} />

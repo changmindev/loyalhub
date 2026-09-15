@@ -129,7 +129,7 @@ const CouponSend = () => {
       {(isCustomersError || isHistoryError) && (
         <QueryErrorNotice onRetry={() => refetchCustomers()} />
       )}
-      <h1 className="text-xl font-bold mb-1">쿠폰 / 공지 발송</h1>
+      <h1 className="font-display text-2xl font-extrabold mb-1">쿠폰 / 공지 발송</h1>
       <p className="text-xs text-muted-foreground mb-3">
         간단한 템플릿을 골라 바로 문자를 보내보세요.
       </p>
@@ -148,7 +148,7 @@ const CouponSend = () => {
       )}
 
       {/* 발송 대상 */}
-      <div className="rounded-2xl border bg-card p-4 mb-3">
+      <div className="rounded-2xl bg-card shadow-sm p-4 mb-3">
         <label className="text-sm font-semibold mb-2 block">발송 대상</label>
         <div className="flex gap-2 flex-wrap">
           {targetOptions.map((t) => (
@@ -158,7 +158,7 @@ const CouponSend = () => {
               onClick={() => setTarget(t)}
               className={`rounded-full px-4 py-1.5 text-xs font-medium transition-all ${
                 target === t
-                  ? "bg-primary text-primary-foreground shadow-sm"
+                  ? "bg-highlight text-highlight-foreground"
                   : "bg-secondary text-secondary-foreground"
               }`}
             >
@@ -168,7 +168,7 @@ const CouponSend = () => {
         </div>
         <p className="text-xs text-muted-foreground mt-2">
           대상 고객:{" "}
-          <span data-testid="target-count" className="font-semibold text-foreground">
+          <span data-testid="target-count" className="font-display font-bold text-accent-strong">
             {isLoadingCustomers ? "계산 중..." : `${targetCount}명`}
           </span>
         </p>
@@ -179,7 +179,7 @@ const CouponSend = () => {
           이게 없으면 템플릿 가로 스크롤 영역이 카드를 밀어 화면 밖으로 넘친다
           (390px 화면에서 666px 로 벌어져 페이지에 가로 스크롤이 생겼다) */}
       <div className="grid gap-3 mb-3 min-w-0">
-        <div className="rounded-2xl border bg-card p-4 min-w-0">
+        <div className="rounded-2xl bg-card shadow-sm p-4 min-w-0">
           <div className="flex items-center justify-between mb-2">
             <label className="text-sm font-semibold">추천 문구 템플릿</label>
             <span className="text-[10px] text-muted-foreground">
@@ -210,7 +210,7 @@ const CouponSend = () => {
           </div>
         </div>
 
-        <div className="rounded-2xl border bg-card p-4 min-w-0">
+        <div className="rounded-2xl bg-card shadow-sm p-4 min-w-0">
           <label className="text-sm font-semibold mb-2 block">메시지 내용</label>
           <textarea
             data-testid="coupon-message"
@@ -234,7 +234,7 @@ const CouponSend = () => {
       </div>
 
       {/* 예약 발송 */}
-      <div className="rounded-2xl border bg-card p-4 mb-4">
+      <div className="rounded-2xl bg-card shadow-sm p-4 mb-4">
         <button
           onClick={() => setIsScheduled(!isScheduled)}
           className="flex items-center justify-between w-full"
@@ -301,7 +301,7 @@ const CouponSend = () => {
         className={`w-full rounded-2xl py-3.5 text-sm font-semibold flex items-center justify-center gap-2 transition-all ${
           sent
             ? "bg-success text-success-foreground"
-            : "bg-primary text-primary-foreground active:opacity-90 shadow-sm"
+            : "bg-highlight text-highlight-foreground active:opacity-90 shadow-sm"
         }`}
       >
         {sent ? (
@@ -327,7 +327,7 @@ const CouponSend = () => {
             <li className="text-xs text-muted-foreground">불러오는 중...</li>
           )}
           {couponHistory?.map((c) => (
-            <li key={c.id} data-testid="coupon-history-item" className="rounded-2xl border bg-card p-3.5">
+            <li key={c.id} data-testid="coupon-history-item" className="rounded-2xl bg-card shadow-sm p-3.5">
               <p className="text-sm font-medium">{c.title}</p>
               <p className="text-xs text-muted-foreground mt-1">
                 {formatKoreanDate(c.sentAt)} · {c.targetGrade} · {c.sentCount}명
