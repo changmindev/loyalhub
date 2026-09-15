@@ -8,18 +8,49 @@ interface StatCardProps {
   className?: string;
   /** E2E 셀렉터. 값 부분에 붙는다 — 라벨 문구가 바뀌어도 테스트가 안 깨지도록. */
   testId?: string;
+  /** 벤토 그리드에서 한 칸만 강조할 때. 나머지는 기본(카드) 톤을 유지한다. */
+  variant?: 'default' | 'highlight';
 }
 
-const StatCard = ({ icon: Icon, label, value, sub, className = '', testId }: StatCardProps) => (
-  <div className={`rounded-2xl border bg-card p-4 ${className}`}>
-    <div className="flex items-center gap-2 text-muted-foreground mb-2">
-      <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
-        <Icon className="h-3.5 w-3.5 text-primary" />
+const StatCard = ({
+  icon: Icon,
+  label,
+  value,
+  sub,
+  className = '',
+  testId,
+  variant = 'default',
+}: StatCardProps) => {
+  const isHighlight = variant === 'highlight';
+
+  return (
+    <div
+      className={`rounded-2xl p-4 ${
+        isHighlight
+          ? 'bg-highlight text-highlight-foreground'
+          : 'border bg-card'
+      } ${className}`}
+    >
+      <div
+        className={`flex items-center justify-between mb-2 ${
+          isHighlight ? 'text-highlight-foreground/80' : 'text-accent-strong'
+        }`}
+      >
+        <span className="text-xs font-semibold">{label}</span>
+        <Icon className="h-3.5 w-3.5" />
       </div>
-      <span className="text-xs font-medium">{label}</span>
+      <p className="font-display text-2xl font-extrabold tracking-tight">
+        <span data-testid={testId}>{value}</span>
+        <span
+          className={`text-sm font-normal ml-0.5 ${
+            isHighlight ? 'text-highlight-foreground/70' : 'text-muted-foreground'
+          }`}
+        >
+          {sub}
+        </span>
+      </p>
     </div>
-    <p className="text-2xl font-bold tracking-tight"><span data-testid={testId}>{value}</span><span className="text-sm font-normal text-muted-foreground ml-0.5">{sub}</span></p>
-  </div>
-);
+  );
+};
 
 export default StatCard;

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=Urbanist:wght@600;700;800;900&family=Epilogue:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -51,6 +51,13 @@
     --normal: 30 20% 70%;
     --normal-foreground: 0 0% 100%;
 
+    /* 벤토 그리드 강조 카드용 — 2026-09 Lovable "진한 대비 정돈" 디자인 검토 반영 */
+    --highlight: 38 92% 55%;
+    --highlight-foreground: 20 45% 16%;
+    --banner: 14 55% 24%;
+    --banner-foreground: 35 45% 95%;
+    --accent-strong: 14 62% 40%;
+
     --sidebar-background: 30 25% 96%;
     --sidebar-foreground: 20 20% 25%;
     --sidebar-primary: 25 80% 52%;
@@ -81,6 +88,11 @@
     --border: 20 15% 22%;
     --input: 20 15% 22%;
     --ring: 25 80% 52%;
+    --highlight: 38 80% 48%;
+    --highlight-foreground: 20 40% 12%;
+    --banner: 14 45% 18%;
+    --banner-foreground: 35 40% 92%;
+    --accent-strong: 14 55% 60%;
     --sidebar-background: 20 18% 12%;
     --sidebar-foreground: 30 20% 92%;
     --sidebar-primary: 25 80% 52%;
@@ -100,5 +112,13 @@
   body {
     @apply bg-background text-foreground font-sans;
     font-family: 'Noto Sans KR', sans-serif;
+  }
+}
+
+@layer utilities {
+  /* 숫자·영문은 Urbanist, 한글은 Noto Sans KR 로 자연 폴백된다
+     (Urbanist/Epilogue 는 한글 글리프가 없음 — 라틴/숫자에만 적용됨) */
+  .font-display {
+    font-family: 'Urbanist', 'Noto Sans KR', sans-serif;
   }
 }
